@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { Header } from '@/components/common/Header';
 import { BottomNav } from '@/components/common/BottomNav';
 import { useEquipment } from '@/context/EquipmentContext';
-import { AuthGuard } from '@/components/auth/AuthGuard';
 import {
   BarChart3,
   CheckCircle2,
@@ -24,8 +23,7 @@ export default function StatusPage() {
   };
 
   return (
-    <AuthGuard>
-      <div className="min-h-screen bg-slate-50 flex flex-col pb-24">
+    <div className="min-h-screen bg-slate-50 flex flex-col pb-24">
       {/* Header with back button */}
       <Header
         showBack
@@ -220,9 +218,8 @@ export default function StatusPage() {
         </div>
       </main>
 
-        {/* Mobile Bottom Navigation */}
+        {/* Bottom Navigation */}
         <BottomNav />
       </div>
-    </AuthGuard>
   );
 }
