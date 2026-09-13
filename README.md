@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 기술진로부 지원앱
 
-## Getting Started
+> 교사
 
-First, run the development server:
+## 1. 프로젝트 소개
+- 주 사용자: 학교 구성원
+- 문제 영역: 행정·업무 효율화
+- 결과물 형태: 웹앱
+- 완성 상태: 아이디어
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 2. 해결하려는 문제
+학과장이나 신규 교사가 실습실 기자재를 조사할 때, 에듀파인 물품대장에서 기자재명·모델을 일일이 검색하고 실제 수량과 대조해야 하는 불편을 줄이고 싶습니다. 사진 한 장으로 등록 기자재를 빠르게 찾아 현장 조사를 돕는 웹을 만들고자 합니다.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 3. 해결 방법
+관리자가 K-에듀파인에서 내려받은 기자재 엑셀 대장을 웹에 등록하고, 교사는 실습실에서 기자재 사진만 촬영하도록 합니다. AI가 사진의 품목·제조사·모델명을 분석해 등록 대장에서 유사 기자재를 찾아 제시하고, 교사가 확인 후 실제 수량을 입력하도록 설계합니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 4. 핵심 기능
+- 기자재 사진을 촬영하면 AI가 품목·제조사·모델명을 분석해 등록된 K-에듀파인 기자재 대장에서 유사 항목을 찾아줍니다.
+- 관리자가 업로드한 K-에듀파인 엑셀 기자재 대장을 기준으로 등록수량과 현장 실제수량을 비교할 수 있습니다.
+- 기자재 후보를 교사가 직접 확인·선택해 오인식을 줄이고, 학과별 기자재 실사 결과를 빠르게 정리할 수 있습니다.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 5. 사용 흐름
+1. 엑셀 등록 → 기자재 촬영 → AI 매칭·수량 확인
 
-## Learn More
+## 6. 검토 및 개선
+- 검토 및 개선 내용을 입력해 주세요.
 
-To learn more about Next.js, take a look at the following resources:
+## 7. 성찰과 성장
+- 사람이 확인한 일: 현장에서 실제로 불편했던 기자재 실사 과정을 기준으로 필요한 기능을 정하고, 에듀파인과 중복 업무가 생기지 않도록 서비스 범위를 결정했습니다. 또한 AI가 자동 확정하지 않고 교사가 후보와 수량을 최종 확인하도록 판단했습니다.
+- 개인정보 처리: 개인정보를 처리함
+- 배운 점: 아이디어만 떠올리는 데서 그치지 않고, AI와 개발도구를 활용해 실제 학교 업무의 불편을 웹서비스로 구현할 수 있게 되었습니다. 
+- 다음 계획: 실제 K-에듀파인 기자재 엑셀 형식에 맞춘 데이터 연동을 안정화하고, 학교 로그인과 관리자 권한을 보완하고 싶습니다. 또한 실제 교사를 대상으로 사용성을 검증해 화면을 더 단순화하고 기자재 인식 정확도와 실사 시간 단축 효과도 측정하고 싶습니다.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 사용 도구
+GPT,안티그래비티, 기텁, 파이어베이스,버셀
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## GitHub 저장소
+https://github.com/khw91229472/hackton-2
+## 바로 사용하기
+hackton-2-4pcd3v0we-heewon4.vercel.app
