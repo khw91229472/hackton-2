@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Header } from '@/components/common/Header';
 import { BottomNav } from '@/components/common/BottomNav';
 import { useEquipment } from '@/context/EquipmentContext';
+import { useAuth } from '@/context/AuthContext';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import {
   FileSpreadsheet,
@@ -14,9 +16,11 @@ import {
   Clock,
   Info,
   Layers,
+  ShieldCheck,
 } from 'lucide-react';
 
 export default function DataManagementPage() {
+  const { profile } = useAuth();
   const { equipments } = useEquipment();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDept, setSelectedDept] = useState<string>('전체');
@@ -55,36 +59,43 @@ export default function DataManagementPage() {
           </p>
         </div>
 
-        {/* Excel File Import UI Area (Future Implementation) */}
-        <div className="relative overflow-hidden rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/40 p-6 text-center">
-          {/* Badge: Upcoming Feature */}
-          <div className="mx-auto mb-3 inline-flex items-center gap-1 rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold text-indigo-800 border border-indigo-200">
-            <Info className="h-3.5 w-3.5 text-indigo-600" />
-            <span>추후 구현 예정 (Firebase 및 엑셀 파서 연동)</span>
-          </div>
+        {/* Excel File Import UI Area - 관리자 전용 노출 (일반 교사에게는 절대 노출하지 않음) */}
+        {profile?.role === 'admin' ? (
+          <div className="relative overflow-hidden rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/40 p-6 text-center">
+            <div className="mx-auto mb-3 inline-flex items-center gap-1 rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold text-indigo-800 border border-indigo-200">
+              <ShieldCheck className="h-3.5 w-3.5 text-indigo-600" />
+              <span>관리자 전용 기능</span>
+            </div>
 
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-indigo-600 shadow-sm border border-indigo-100">
-            <Upload className="h-6 w-6" />
-          </div>
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-indigo-600 shadow-sm border border-indigo-100">
+              <Upload className="h-6 w-6" />
+            </div>
 
-          <h3 className="mt-3 text-sm font-extrabold text-slate-900">
-            K-에듀파인 엑셀 파일 불러오기
-          </h3>
-          <p className="mt-1 text-xs text-slate-500 max-w-xs mx-auto">
-            K-에듀파인 물품관리 메뉴에서 다운로드한 .xlsx 파일을 선택하면 실습실별 대조 목록이 자동 생성됩니다.
-          </p>
+            <h3 className="mt-3 text-sm font-extrabold text-slate-900">
+              K-에듀파인 엑셀 파일 불러오기
+            </h3>
+            <p className="mt-1 text-xs text-slate-500 max-w-xs mx-auto">
+              관리자 권한으로 .xlsx 파일을 업로드하여 원본 대장을 일괄 등록/수정합니다.
+            </p>
 
-          <div className="mt-4">
-            <button
-              type="button"
-              onClick={() => alert('추후 구현 예정 기능입니다. 현재는 실습용 표준 K-에듀파인 샘플 데이터가 로드되어 있습니다.')}
-              className="touch-target inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 active:scale-[0.99] transition-all"
-            >
-              <FileSpreadsheet className="h-4 w-4" />
-              <span>Excel 파일 불러오기</span>
-            </button>
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <Link
+                href="/admin"
+                className="touch-target inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 active:scale-[0.99] transition-all"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                <span>관리자 페이지에서 Excel 업로드하기</span>
+              </Link>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-xs text-slate-600 flex items-start gap-2.5">
+            <Info className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+            <div className="leading-relaxed">
+              <strong>교사용 안내:</strong> 본 목록은 현장 실사를 돕기 위한 <strong>읽기 전용</strong> 조회 화면입니다. 원본 대장 수정 및 엑셀 일괄 등록은 행정 관리자 권한으로만 가능합니다.
+            </div>
+          </div>
+        )}
 
         {/* Currently Loaded Data List */}
         <div className="space-y-3">

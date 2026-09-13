@@ -15,6 +15,8 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children, allowedRoles }) 
   const router = useRouter();
   const pathname = usePathname();
 
+  const isUnauthorized = Boolean(allowedRoles && role && !allowedRoles.includes(role));
+
   useEffect(() => {
     // If auth state is verified and user is not authenticated
     if (!loading && !isAuthenticated) {
@@ -24,6 +26,15 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children, allowedRoles }) 
       }
     }
   }, [loading, isAuthenticated, pathname, router]);
+
+  useEffect(() => {
+    if (!loading && isAuthenticated && isUnauthorized) {
+      const timer = setTimeout(() => {
+        router.replace('/');
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, isAuthenticated, isUnauthorized, router]);
 
   // If loading, show simple clean loading spinner instead of blank screen
   if (loading) {
@@ -48,21 +59,24 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children, allowedRoles }) 
   }
 
   // Check role restriction if specified
-  if (allowedRoles && role && !allowedRoles.includes(role)) {
+  if (isUnauthorized) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-6 text-center">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm max-w-sm w-full">
-          <div className="text-3xl mb-2">🔒</div>
-          <h2 className="text-base font-bold text-slate-800">접근 권한이 없습니다</h2>
-          <p className="mt-1 text-xs text-slate-500">
-            관리자만 접근할 수 있는 페이지입니다.
+        <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm max-w-sm w-full animate-in fade-in duration-200">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 mb-3.5">
+            <span className="text-2xl">🔒</span>
+          </div>
+          <h2 className="text-base font-extrabold text-slate-900">
+            관리자 권한이 필요한 페이지입니다.
+          </h2>
+          <p className="mt-2 text-xs text-slate-500 leading-relaxed">
+            일반 교사 계정으로는 접근할 수 없습니다.<br />
+            잠시 후 홈 화면으로 이동합니다.
           </p>
-          <button
-            onClick={() => router.push('/')}
-            className="mt-4 w-full rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white shadow-xs"
-          >
-            홈으로 이동
-          </button>
+          <div className="mt-4 flex items-center justify-center gap-2 text-xs text-blue-600 font-semibold">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            <span>홈으로 이동 중...</span>
+          </div>
         </div>
       </div>
     );

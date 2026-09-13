@@ -166,6 +166,37 @@ export default function HomePage() {
           </Link>
         </div>
 
+          {/* 4. 관리자 전용: 관리자 모드 링크 (관리자 로그인 시에만 노출) */}
+          {profile?.role === 'admin' && (
+            <Link
+              href="/admin"
+              className="touch-target group block rounded-3xl border-2 border-indigo-500 bg-linear-to-r from-indigo-900 to-slate-900 p-5 text-white shadow-md hover:shadow-lg transition-all active:scale-[0.99]"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3.5">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-yellow-300 backdrop-blur-md">
+                    <ShieldCheck className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <div className="inline-flex items-center gap-1 rounded bg-yellow-400/20 px-1.5 py-0.5 text-[10px] font-bold text-yellow-300">
+                      관리자 전용
+                    </div>
+                    <h2 className="text-base font-extrabold text-white mt-0.5">
+                      관리자 모드 바로가기
+                    </h2>
+                    <p className="text-xs text-indigo-200">
+                      K-에듀파인 대장 총괄, Excel 업로드, 수량 불일치 확인
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white group-hover:translate-x-1 transition-transform">
+                  <ArrowRight className="h-4 w-4 stroke-[2.5]" />
+                </div>
+              </div>
+            </Link>
+          )}
+
         {/* Notice Card for Teachers */}
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
           <h3 className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
