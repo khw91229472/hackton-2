@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Header } from '@/components/common/Header';
 import { BottomNav } from '@/components/common/BottomNav';
 import { useEquipment } from '@/context/EquipmentContext';
+import { AuthGuard } from '@/components/auth/AuthGuard';
 import {
   FileSpreadsheet,
   Upload,
@@ -31,7 +32,8 @@ export default function DataManagementPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col pb-24">
+    <AuthGuard>
+      <div className="min-h-screen bg-slate-50 flex flex-col pb-24">
       {/* Header with back button */}
       <Header
         showBack
@@ -204,8 +206,9 @@ export default function DataManagementPage() {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation */}
-      <BottomNav />
-    </div>
+        {/* Mobile Bottom Navigation */}
+        <BottomNav />
+      </div>
+    </AuthGuard>
   );
 }

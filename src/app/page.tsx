@@ -5,43 +5,63 @@ import Link from 'next/link';
 import { Header } from '@/components/common/Header';
 import { BottomNav } from '@/components/common/BottomNav';
 import { useEquipment } from '@/context/EquipmentContext';
-import { Camera, BarChart3, Database, ArrowRight, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { AuthGuard } from '@/components/auth/AuthGuard';
+import { Camera, BarChart3, Database, ArrowRight, CheckCircle2, AlertCircle, Sparkles, User, ShieldCheck } from 'lucide-react';
 
 export default function HomePage() {
   const { totalRegistered, totalVerified, overallProgress, totalMismatched } = useEquipment();
+  const { profile } = useAuth();
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col pb-24">
-      {/* Top Header */}
-      <Header />
+    <AuthGuard>
+      <div className="min-h-screen bg-slate-50 flex flex-col pb-24">
+        {/* Top Header */}
+        <Header />
 
-      {/* Main container */}
-      <main className="mx-auto w-full max-w-xl px-4 py-6 flex-1 space-y-6">
-        {/* Welcome & Subtitle Banner */}
-        <div className="rounded-3xl bg-linear-to-br from-blue-700 via-blue-600 to-indigo-700 p-6 text-white shadow-lg relative overflow-hidden">
-          {/* Subtle background decorative shapes */}
-          <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10 blur-xl pointer-events-none" />
-          <div className="absolute -left-6 -bottom-6 h-28 w-28 rounded-full bg-blue-400/20 blur-lg pointer-events-none" />
+        {/* Main container */}
+        <main className="mx-auto w-full max-w-xl px-4 py-6 flex-1 space-y-6">
+          {/* Welcome & Subtitle Banner */}
+          <div className="rounded-3xl bg-linear-to-br from-blue-700 via-blue-600 to-indigo-700 p-6 text-white shadow-lg relative overflow-hidden">
+            {/* Subtle background decorative shapes */}
+            <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10 blur-xl pointer-events-none" />
+            <div className="absolute -left-6 -bottom-6 h-28 w-28 rounded-full bg-blue-400/20 blur-lg pointer-events-none" />
 
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur-md">
-              <Sparkles className="h-3.5 w-3.5 text-yellow-300" />
-              <span>실습실 현장 실사 지원</span>
-            </div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur-md">
+                  <Sparkles className="h-3.5 w-3.5 text-yellow-300" />
+                  <span>실습실 현장 실사 지원</span>
+                </div>
 
-            <h1 className="mt-3 text-2xl font-black tracking-tight text-white sm:text-3xl">
-              기자재ON
-            </h1>
-            <p className="mt-1 text-sm font-medium text-blue-100">
-              찍으면 찾고, 확인하면 끝
-            </p>
-
-            {/* Quick mini-progress strip */}
-            <div className="mt-5 rounded-2xl bg-white/10 p-3.5 backdrop-blur-md border border-white/15">
-              <div className="flex items-center justify-between text-xs mb-1.5">
-                <span className="text-blue-100 font-medium">전체 조사 진행률</span>
-                <span className="font-extrabold text-white text-sm">{overallProgress}%</span>
+                {/* Logged in User Badge (e.g. 김교사 · 뷰티메이크업과) */}
+                {profile && (
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur-md border border-white/20">
+                    {profile.role === 'admin' ? (
+                      <ShieldCheck className="h-3.5 w-3.5 text-yellow-300" />
+                    ) : (
+                      <User className="h-3 w-3 text-blue-200" />
+                    )}
+                    <span>
+                      {profile.name} · {profile.department}
+                    </span>
+                  </div>
+                )}
               </div>
+
+              <h1 className="mt-3 text-2xl font-black tracking-tight text-white sm:text-3xl">
+                기자재ON
+              </h1>
+              <p className="mt-1 text-sm font-medium text-blue-100">
+                찍으면 찾고, 확인하면 끝
+              </p>
+
+              {/* Quick mini-progress strip */}
+              <div className="mt-5 rounded-2xl bg-white/10 p-3.5 backdrop-blur-md border border-white/15">
+                <div className="flex items-center justify-between text-xs mb-1.5">
+                  <span className="text-blue-100 font-medium">전체 조사 진행률</span>
+                  <span className="font-extrabold text-white text-sm">{overallProgress}%</span>
+                </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-black/20">
                 <div
                   className="h-full rounded-full bg-white transition-all duration-500"
@@ -165,8 +185,9 @@ export default function HomePage() {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation */}
-      <BottomNav />
-    </div>
+        {/* Mobile Bottom Navigation */}
+        <BottomNav />
+      </div>
+    </AuthGuard>
   );
 }

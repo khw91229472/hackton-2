@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import { AuthProvider } from '@/context/AuthContext';
 import { EquipmentProvider } from '@/context/EquipmentContext';
 
 export const metadata: Metadata = {
@@ -22,9 +23,11 @@ export default function RootLayout({
   return (
     <html lang="ko" className="h-full bg-slate-50 antialiased">
       <body className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-900">
-        <EquipmentProvider>
-          {children}
-        </EquipmentProvider>
+        <AuthProvider>
+          <EquipmentProvider>
+            {children}
+          </EquipmentProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -3,7 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, School, Sparkles } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { ChevronLeft, School, Sparkles, LogOut, User as UserIcon, ShieldCheck } from 'lucide-react';
 
 interface HeaderProps {
   title?: string;
@@ -21,6 +22,7 @@ export const Header: React.FC<HeaderProps> = ({
   onBack,
 }) => {
   const router = useRouter();
+  const { profile, logout, isAuthenticated } = useAuth();
 
   const handleBack = () => {
     if (onBack) {
@@ -32,13 +34,49 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
+  const handleLogout = async () => {
+    await logout();
+    router.replace('/login');
+  };
+
   return (
     <header className="sticky top-0 z-30 w-full border-b border-slate-200 bg-white/95 backdrop-blur">
-      {/* Top Organization Badge */}
-      <div className="bg-slate-50 border-b border-slate-100 px-4 py-1 text-center">
-        <div className="mx-auto flex max-w-xl items-center justify-center gap-1.5 text-xs text-slate-500">
-          <School className="h-3.5 w-3.5 text-blue-600" />
-          <span>서울특별시교육청 위탁형 직업교육학교 실습실 기자재 보조시스템</span>
+      {/* Top Organization Badge & User Info */}
+      <div className="bg-slate-50 border-b border-slate-100 px-4 py-1.5">
+        <div className="mx-auto flex max-w-xl items-center justify-between text-xs text-slate-500">
+          <div className="flex items-center gap-1.5">
+            <School className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+            <span className="truncate">{profile?.schoolName || '은평문화예술정보학교'}</span>
+          </div>
+
+          {/* User & Department indicator */}
+          {isAuthenticated && profile && (
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-slate-700 flex items-center gap-1">
+                {profile.role === 'admin' ? (
+                  <span className="rounded bg-indigo-100 text-indigo-800 text-[10px] px-1 py-0.2 font-bold flex items-center gap-0.5">
+                    <ShieldCheck className="h-3 w-3" />
+                    관리자
+                  </span>
+                ) : (
+                  <UserIcon className="h-3 w-3 text-slate-400" />
+                )}
+                <span>
+                  {profile.name} · {profile.department}
+                </span>
+              </span>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="text-[11px] text-slate-400 hover:text-rose-600 flex items-center gap-0.5 underline transition-colors"
+                title="로그아웃"
+              >
+                <LogOut className="h-3 w-3" />
+                <span>로그아웃</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -75,10 +113,20 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right Action / Status Badge */}
         <div className="flex items-center gap-2">
-          <div className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 border border-blue-100">
-            <Sparkles className="h-3 w-3 text-blue-600" />
-            <span>K-에듀파인 보조</span>
-          </div>
+          {profile?.role === 'admin' ? (
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 border border-indigo-100 hover:bg-indigo-100 transition-colors"
+            >
+              <ShieldCheck className="h-3 w-3 text-indigo-600" />
+              <span>관리자 모드</span>
+            </Link>
+          ) : (
+            <div className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 border border-blue-100">
+              <Sparkles className="h-3 w-3 text-blue-600" />
+              <span>K-에듀파인 보조</span>
+            </div>
+          )}
         </div>
       </div>
 
