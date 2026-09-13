@@ -19,6 +19,7 @@ import {
   Layers,
   Download,
   Check,
+  PlayCircle,
 } from 'lucide-react';
 
 export default function AdminPage() {
@@ -69,6 +70,26 @@ export default function AdminPage() {
     }
   };
 
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      setUploadedFileName(file.name);
+      setUploadState('uploading');
+      setTimeout(() => {
+        setUploadState('success');
+      }, 1200);
+    }
+  };
+
+  const handleDemoClick = () => {
+    setUploadedFileName('2026_은평문화예술정보학교_에듀파인_기자재대장.xlsx');
+    setUploadState('uploading');
+    setTimeout(() => {
+      setUploadState('success');
+    }, 800);
+  };
+
   return (
     <AuthGuard allowedRoles={['admin']}>
       <div className="min-h-screen bg-slate-50 flex flex-col pb-24">
@@ -88,7 +109,7 @@ export default function AdminPage() {
                 <span>관리자 모드</span>
               </div>
               <span className="text-xs text-indigo-200 font-medium">
-                {profile?.name || '관리자'} ({profile?.department || '행정총괄부'})
+                {profile?.name || '관리자'}
               </span>
             </div>
 
@@ -231,7 +252,11 @@ export default function AdminPage() {
               </div>
 
               {/* Upload Dropzone */}
-              <div className="rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/40 p-6 text-center">
+              <div
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleDrop}
+                className="rounded-2xl border-2 border-dashed border-indigo-200 bg-indigo-50/40 hover:bg-indigo-50/70 p-6 text-center transition-colors"
+              >
                 <input
                   type="file"
                   id="admin-excel-input"
@@ -247,12 +272,31 @@ export default function AdminPage() {
                     <Upload className="h-6 w-6" />
                   </div>
                   <span className="text-sm font-bold text-slate-800">
-                    Excel 파일(.xlsx) 선택 또는 드래그
+                    {uploadedFileName ? uploadedFileName : 'Excel 파일(.xlsx) 선택 또는 드래그'}
                   </span>
                   <span className="mt-1 text-xs text-slate-400">
                     물품관리번호, 물품명, 규격, 학과, 등록수량 열이 포함되어야 합니다.
                   </span>
                 </label>
+              </div>
+
+              {/* 시연용 퀵 버튼 (발표 시 엑셀 파일 찾느라 버벅거리지 않는 치트키) */}
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleDemoClick}
+                  className="inline-flex items-center text-xs font-semibold text-slate-500 hover:text-indigo-600 py-1.5 px-2.5 rounded-lg hover:bg-indigo-50/70 transition"
+                >
+                  <PlayCircle className="w-4 h-4 mr-1.5 text-indigo-500" />
+                  데모용 샘플 데이터로 즉시 확인하기
+                </button>
+
+                <Link
+                  href="/viewer"
+                  className="inline-flex items-center text-xs font-bold text-indigo-600 hover:underline py-1.5 px-2.5"
+                >
+                  인수인계 뷰어로 바로보기 →
+                </Link>
               </div>
 
               {/* Upload Status Feedback */}

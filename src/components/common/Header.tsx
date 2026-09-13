@@ -62,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <UserIcon className="h-3 w-3 text-slate-400" />
                 )}
                 <span>
-                  {profile.name} · {profile.department}
+                  {profile.role === 'admin' ? profile.name : `${profile.name} · ${profile.department}`}
                 </span>
               </span>
 

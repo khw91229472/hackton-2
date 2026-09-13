@@ -7,7 +7,7 @@ import { BottomNav } from '@/components/common/BottomNav';
 import { useEquipment } from '@/context/EquipmentContext';
 import { useAuth } from '@/context/AuthContext';
 import { AuthGuard } from '@/components/auth/AuthGuard';
-import { Camera, BarChart3, Database, ArrowRight, CheckCircle2, AlertCircle, Sparkles, User, ShieldCheck } from 'lucide-react';
+import { Camera, BarChart3, Database, ArrowRight, CheckCircle2, AlertCircle, Sparkles, User, ShieldCheck, FileSpreadsheet } from 'lucide-react';
 
 export default function HomePage() {
   const { totalRegistered, totalVerified, overallProgress, totalMismatched } = useEquipment();
@@ -43,7 +43,7 @@ export default function HomePage() {
                       <User className="h-3 w-3 text-blue-200" />
                     )}
                     <span>
-                      {profile.name} · {profile.department}
+                      {profile.role === 'admin' ? profile.name : `${profile.name} · ${profile.department}`}
                     </span>
                   </div>
                 )}
@@ -159,6 +159,36 @@ export default function HomePage() {
                 </p>
                 <div className="mt-2.5 inline-flex items-center gap-1 text-xs font-bold text-indigo-600">
                   <span>K-에듀파인 목록 보기</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          {/* 4. 특성화고 실습실 인수인계 뷰어 (LabMate) */}
+          <Link
+            href="/viewer"
+            className="touch-target group block rounded-3xl border border-indigo-100 bg-linear-to-r from-indigo-50/70 to-blue-50/70 p-5 shadow-xs hover:border-indigo-300 hover:shadow-md transition-all active:scale-[0.99]"
+          >
+            <div className="flex items-start gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-indigo-600 text-white group-hover:scale-105 transition-transform shadow-xs">
+                <FileSpreadsheet className="h-7 w-7 stroke-[2.2]" />
+              </div>
+
+              <div className="min-w-0 flex-1 pt-0.5">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-extrabold text-slate-900 group-hover:text-indigo-700 transition-colors">
+                    인수인계 뷰어 (LabMate)
+                  </h2>
+                  <span className="rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5">
+                    NEW
+                  </span>
+                </div>
+                <p className="mt-1 text-xs font-medium text-slate-600">
+                  복잡한 에듀파인 엑셀 대장 드래그 & 드롭 한 번에 시각화
+                </p>
+                <div className="mt-2.5 inline-flex items-center gap-1 text-xs font-bold text-indigo-600">
+                  <span>대장 엑셀 정리해서 보기</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </div>
               </div>

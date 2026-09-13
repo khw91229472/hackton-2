@@ -173,7 +173,7 @@ export default function LoginPage() {
               className="touch-target flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-50/70 p-2.5 text-center hover:bg-indigo-50 hover:border-indigo-200 transition-colors"
             >
               <span className="text-xs font-bold text-slate-800">시스템 관리자</span>
-              <span className="text-[10px] text-slate-500">행정총괄부</span>
+              <span className="text-[10px] text-slate-500">관리자 계정</span>
             </button>
           </div>
         </div>
