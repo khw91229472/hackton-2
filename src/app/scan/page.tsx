@@ -14,6 +14,7 @@ import { AiAnalysisResult, CandidateItem } from '@/types/equipment';
 import { useEquipment } from '@/context/EquipmentContext';
 import { useAuth } from '@/context/AuthContext';
 import { createInspection } from '@/services/inspectionService';
+import { AuthGuard } from '@/components/auth/AuthGuard';
 import { Loader2, ArrowLeft } from 'lucide-react';
 
 export default function ScanPage() {
@@ -67,25 +68,27 @@ export default function ScanPage() {
     updateEquipmentVerification(selectedCandidate.id, actualQuantity, notes);
 
     // Save independent inspection log to Firestore inspections collection
-    const diff = actualQuantity - selectedCandidate.registeredQuantity;
-    createInspection({
-      equipmentId: selectedCandidate.id,
-      assetNumber: selectedCandidate.id,
-      equipmentName: selectedCandidate.name,
-      modelName: selectedCandidate.modelName,
-      department: selectedCandidate.department,
-      location: selectedCandidate.location,
-      registeredQuantity: selectedCandidate.registeredQuantity,
-      actualQuantity,
-      difference: diff,
-      status: diff === 0 ? 'matched' : 'mismatched',
-      notes,
-      inspectorId: user?.uid || profile?.uid || 'guest-teacher-uid',
-      inspectorName: profile?.name || '현장 교사',
-      schoolId: profile?.schoolId || 'eunpyeong',
-      schoolName: profile?.schoolName || '은평문화예술정보학교',
-      createdAt: new Date().toISOString(),
-    }).catch((err) => console.warn('Failed to log inspection:', err));
+    if (profile) {
+      const diff = actualQuantity - selectedCandidate.registeredQuantity;
+      createInspection({
+        equipmentId: selectedCandidate.id,
+        assetNumber: selectedCandidate.id,
+        equipmentName: selectedCandidate.name,
+        modelName: selectedCandidate.modelName,
+        department: selectedCandidate.department,
+        location: selectedCandidate.location,
+        registeredQuantity: selectedCandidate.registeredQuantity,
+        actualQuantity,
+        difference: diff,
+        status: diff === 0 ? 'matched' : 'mismatched',
+        notes,
+        inspectorId: user?.uid || profile.uid,
+        inspectorName: profile.name,
+        schoolId: profile.schoolId,
+        schoolName: profile.schoolName,
+        createdAt: new Date().toISOString(),
+      }).catch((err) => console.warn('Failed to log inspection:', err));
+    }
 
     // Show success dialog
     setCompletedInfo({
@@ -116,7 +119,8 @@ export default function ScanPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col pb-24">
+    <AuthGuard>
+      <div className="min-h-screen bg-slate-50 flex flex-col pb-24">
         {/* Header with back button */}
         <Header
           showBack
@@ -198,5 +202,6 @@ export default function ScanPage() {
           )}
         </main>
       </div>
+    </AuthGuard>
   );
 }
