@@ -12,6 +12,8 @@ import { StepSuccessModal } from '@/components/scan/StepSuccessModal';
 import { SAMPLE_SCENARIOS, SampleScenario } from '@/data/mockData';
 import { AiAnalysisResult, CandidateItem } from '@/types/equipment';
 import { useEquipment } from '@/context/EquipmentContext';
+import { useAuth } from '@/context/AuthContext';
+import { createInspection } from '@/services/inspectionService';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { Loader2, ArrowLeft } from 'lucide-react';
 
@@ -56,12 +58,37 @@ export default function ScanPage() {
     setCurrentStep(4);
   };
 
+  const { profile, user } = useAuth();
+
   // Step 4 Complete: Save verification & show modal
   const handleQuantityComplete = (actualQuantity: number, notes?: string) => {
     if (!selectedCandidate) return;
 
     // Save in context
     updateEquipmentVerification(selectedCandidate.id, actualQuantity, notes);
+
+    // Save independent inspection log to Firestore inspections collection
+    if (profile) {
+      const diff = actualQuantity - selectedCandidate.registeredQuantity;
+      createInspection({
+        equipmentId: selectedCandidate.id,
+        assetNumber: selectedCandidate.id,
+        equipmentName: selectedCandidate.name,
+        modelName: selectedCandidate.modelName,
+        department: selectedCandidate.department,
+        location: selectedCandidate.location,
+        registeredQuantity: selectedCandidate.registeredQuantity,
+        actualQuantity,
+        difference: diff,
+        status: diff === 0 ? 'matched' : 'mismatched',
+        notes,
+        inspectorId: user?.uid || profile.uid,
+        inspectorName: profile.name,
+        schoolId: profile.schoolId,
+        schoolName: profile.schoolName,
+        createdAt: new Date().toISOString(),
+      }).catch((err) => console.warn('Failed to log inspection:', err));
+    }
 
     // Show success dialog
     setCompletedInfo({

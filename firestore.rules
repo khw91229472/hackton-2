@@ -2,58 +2,110 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // 인증 여부 확인
+    // ============================================================================
+    // 공통 보안 헬퍼 함수 (Helper Functions)
+    // ============================================================================
+
+    // 1. 인증 여부 확인: 비로그인 사용자는 어떠한 데이터도 읽거나 쓸 수 없음
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // 사용자 정보 및 권한 조회
+    // 2. 현재 로그인한 사용자의 Firestore 프로필 문서 조회
     function getUserData() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
-    // 관리자 여부 확인 (role === 'admin')
+    // 3. 사용자 소속 학교 식별자(schoolId) 조회
+    function getUserSchoolId() {
+      return getUserData().schoolId;
+    }
+
+    // 4. 관리자 여부 확인 (role === 'admin')
     function isAdmin() {
       return isAuthenticated() && getUserData().role == 'admin';
     }
 
-    // 교사 여부 확인 (role === 'teacher')
+    // 5. 교사 여부 확인 (role === 'teacher')
     function isTeacher() {
       return isAuthenticated() && getUserData().role == 'teacher';
     }
 
-    // 1. users 컬렉션 권한 규칙
-    // - 인증된 사용자는 본인 계정 정보 조회 및 최초 프로필 생성 가능
-    // - 관리자는 전체 사용자 프로필 조회 및 권한 관리 가능
+    // 6. 학교별 데이터 격리 검증: 사용자의 소속 학교와 대상 문서의 schoolId가 일치하는지 확인
+    function isSameSchool(targetSchoolId) {
+      return isAuthenticated() && targetSchoolId == getUserSchoolId();
+    }
+
+    // ============================================================================
+    // 1. users 컬렉션 규칙
+    // - 일반 사용자는 자신의 사용자 정보만 읽을 수 있음
+    // - admin은 본인 학교의 모든 사용자 정보를 조회하고 관리할 수 있음
+    // ============================================================================
     match /users/{userId} {
-      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
-      allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
-      allow delete: if isAdmin();
-    }
-
-    // 2. equipments 컬렉션 (K-에듀파인 기자재 원본 대장) 권한 규칙
-    // - 원본 기자재 생성(create), 엑셀 일괄 등록, 삭제(delete)는 관리자만 가능
-    // - 일반 교사는 조회(read) 및 현장 실사 필드만 제한적으로 수정(update) 가능
-    match /equipments/{equipmentId} {
-      allow read: if isAuthenticated();
-
-      // 원본 기자재 생성 및 삭제: 관리자 전용
-      allow create, delete: if isAdmin();
-
-      // 수정: 관리자는 모든 필드 수정 가능, 교사는 실사 대조 필드만 수정 가능
-      allow update: if isAdmin() || (
-        isTeacher() &&
-        request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['actualQuantity', 'status', 'notes', 'lastCheckedAt', 'checkedBy'])
+      // 읽기: 본인 계정이거나, 동일 학교 소속의 관리자인 경우만 허용
+      allow read: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        (isAdmin() && isSameSchool(resource.data.schoolId))
       );
+
+      // 생성: 최초 로그인 시 본인 uid로 본인 프로필 생성 허용
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+
+      // 수정: 본인은 개인정보 수정 가능, 관리자는 권한(role) 등 관리 가능
+      allow update: if isAuthenticated() && (
+        (request.auth.uid == userId && request.resource.data.role == resource.data.role) ||
+        (isAdmin() && isSameSchool(resource.data.schoolId))
+      );
+
+      // 삭제: 오직 관리자만 삭제 가능
+      allow delete: if isAdmin() && isSameSchool(resource.data.schoolId);
     }
 
-    // 3. inspections 컬렉션 (실사 이력 로그)
+    // ============================================================================
+    // 2. equipment / equipments 컬렉션 (K-에듀파인 기자재 원본 대장) 규칙
+    // - 로그인한 교사는 소속 학교의 기자재 원본 대장 읽기 가능
+    // - admin만 기자재 생성, 수정, 삭제 가능 (Excel 일괄 업로드 등)
+    // - 중요한 원칙: 교사의 현장 실사 입력으로 equipment 원본 데이터를 직접 수정하지 않음!
+    // ============================================================================
+    match /equipment/{equipmentId} {
+      // 읽기: 동일 학교 소속의 인증된 교사 또는 관리자
+      allow read: if isAuthenticated() && isSameSchool(resource.data.schoolId);
+
+      // 생성/수정/삭제: 오직 동일 학교 소속의 관리자(admin)만 허용 (교사는 원본 수정 절대 불가)
+      allow create: if isAdmin() && isSameSchool(request.resource.data.schoolId);
+      allow update: if isAdmin() && isSameSchool(resource.data.schoolId) && isSameSchool(request.resource.data.schoolId);
+      allow delete: if isAdmin() && isSameSchool(resource.data.schoolId);
+    }
+
+    // 호환성 유지: 복수형 컬렉션명(equipments)에도 동일한 규칙 적용
+    match /equipments/{equipmentId} {
+      allow read: if isAuthenticated() && isSameSchool(resource.data.schoolId);
+      allow create: if isAdmin() && isSameSchool(request.resource.data.schoolId);
+      allow update: if isAdmin() && isSameSchool(resource.data.schoolId) && isSameSchool(request.resource.data.schoolId);
+      allow delete: if isAdmin() && isSameSchool(resource.data.schoolId);
+    }
+
+    // ============================================================================
+    // 3. inspections 컬렉션 (현장 실사 결과 로그) 규칙
+    // - 로그인한 교사는 현장 실사 결과 생성 가능
+    // - 본인이 작성한 실사 결과 조회 가능 (inspectorId == request.auth.uid)
+    // - admin은 소속 학교 전체 교사의 실사 결과 조회 및 관리 가능
+    // - 실사 데이터는 equipment 원본을 건드리지 않고 inspections 컬렉션에 독립 보관
+    // ============================================================================
     match /inspections/{inspectionId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update, delete: if isAdmin();
+      // 읽기: 본인이 작성한 실사 결과이거나 관리자인 경우 (동일 학교 데이터에 한함)
+      allow read: if isAuthenticated() && isSameSchool(resource.data.schoolId) && (
+        resource.data.inspectorId == request.auth.uid ||
+        isAdmin()
+      );
+
+      // 생성: 인증된 교사 또는 관리자가 본인 식별자로 실사 결과 작성
+      allow create: if isAuthenticated() &&
+        isSameSchool(request.resource.data.schoolId) &&
+        request.resource.data.inspectorId == request.auth.uid;
+
+      // 수정/삭제: 실사 결과 정정 및 관리는 관리자(admin) 권한으로만 가능
+      allow update, delete: if isAdmin() && isSameSchool(resource.data.schoolId);
     }
   }
 }
